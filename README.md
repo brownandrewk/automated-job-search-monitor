@@ -288,7 +288,25 @@ C:\JobSearchMonitor\
 
 ## Uninstallation
 
-1. Open Task Scheduler
+**Easy Method (Recommended):**
+
+1. Go to your installation folder (default: `C:\JobSearchMonitor\`)
+2. Double-click `uninstall.bat`
+3. Confirm you want to uninstall
+4. Optionally backup your configuration to Desktop
+5. Confirm final deletion
+
+The uninstaller will:
+- ✅ Remove the Task Scheduler task
+- ✅ Offer to backup your settings
+- ✅ Delete all files and folders
+- ✅ Clean up completely
+
+**Manual Method:**
+
+If you need to uninstall manually:
+
+1. Open Task Scheduler (Win + R, type `taskschd.msc`)
 2. Find "Automated Job Monitor" task
 3. Right-click → Delete
 4. Delete the installation folder (`C:\JobSearchMonitor\`)

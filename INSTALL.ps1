@@ -310,13 +310,39 @@ pause
     
     Write-Success "âœ" Batch files created"
     
-    # Create update_settings.bat (placeholder for now)
+    # Create update_settings.bat (launches PowerShell script)
     @"
 @echo off
-echo Settings update tool coming soon!
-echo For now, edit config.json directly in: $installPath
-pause
+REM Settings Update Launcher for Job Search Monitor
+
+echo Starting settings manager...
+PowerShell.exe -ExecutionPolicy Bypass -File "%~dp0UPDATE_SETTINGS.ps1"
 "@ | Set-Content (Join-Path $installPath "update_settings.bat")
+    
+    # Copy UPDATE_SETTINGS.ps1
+    if (Test-Path (Join-Path $templatesDir "UPDATE_SETTINGS.ps1")) {
+        Copy-Item (Join-Path $templatesDir "UPDATE_SETTINGS.ps1") (Join-Path $installPath "UPDATE_SETTINGS.ps1")
+    } else {
+        # Embedded version if template doesn't exist
+        $updateSettingsScript | Set-Content (Join-Path $installPath "UPDATE_SETTINGS.ps1")
+    }
+    
+    # Copy UNINSTALL.ps1
+    if (Test-Path (Join-Path $templatesDir "UNINSTALL.ps1")) {
+        Copy-Item (Join-Path $templatesDir "UNINSTALL.ps1") (Join-Path $installPath "UNINSTALL.ps1")
+    }
+    
+    # Create uninstall.bat launcher
+    @"
+@echo off
+echo.
+echo WARNING: This will completely remove Job Search Monitor!
+echo.
+pause
+PowerShell.exe -ExecutionPolicy Bypass -File "%~dp0UNINSTALL.ps1"
+"@ | Set-Content (Join-Path $installPath "uninstall.bat")
+    
+    Write-Success "✓ Uninstaller created"
     
     # Create Task Scheduler task
     Write-Host "Setting up Windows Task Scheduler..."
