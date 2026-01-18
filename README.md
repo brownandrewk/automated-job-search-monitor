@@ -4,7 +4,7 @@ An automated job search tool that monitors career websites daily and emails you 
 ### Authors Note: 
 I hope this is helpful for you finding your next career! The more broadly a person expands their job search, the more time is needed to manually scrub each company site of valuable leads. This program is an effort to simply to trim that time. 
 ### Disclaimer: 
-I've heavily leveraged AI tools in the production of this product. 
+I've heavily leveraged AI tools in the production of this tool. 
 
 ## Features
 
