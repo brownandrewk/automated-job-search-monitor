@@ -1,9 +1,8 @@
-# Automated Job Search Monitor - Installer
+# OpportunityAlert - Installer
 # Version 1.0
 
 $ErrorActionPreference = "Continue"
 
-# Colors for output
 function Write-Success { Write-Host $args -ForegroundColor Green }
 function Write-Info { Write-Host $args -ForegroundColor Cyan }
 function Write-Warning { Write-Host $args -ForegroundColor Yellow }
@@ -11,20 +10,12 @@ function Write-Error { Write-Host $args -ForegroundColor Red }
 
 Clear-Host
 Write-Info "=============================================="
-Write-Info "   AUTOMATED JOB SEARCH MONITOR"
+Write-Info "   OPPORTUNITYALERT"
 Write-Info "   Interactive Installer v1.0"
 Write-Info "=============================================="
 Write-Host ""
 
-# Check if running as administrator
-$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-if (-not $isAdmin) {
-    Write-Warning "Note: Not running as administrator. Task Scheduler may require elevation."
-    Write-Warning "If installation fails, right-click and 'Run as Administrator'"
-    Write-Host ""
-}
-
-# Step 1: Check Python Installation
+# Step 1: Check Python
 Write-Info "Step 1: Checking Python Installation"
 Write-Info "--------------------------------------"
 
@@ -35,24 +26,17 @@ try {
         $minor = [int]$matches[2]
         
         if ($major -ge 3 -and $minor -ge 8) {
-            Write-Success "âœ" Python $pythonVersion found"
+            Write-Success "Python $pythonVersion found"
         } else {
-            Write-Error "âœ— Python version too old: $pythonVersion"
+            Write-Error "Python version too old: $pythonVersion"
             Write-Error "Please install Python 3.8 or newer"
-            Write-Host "Visit: https://www.python.org/downloads/"
             pause
             exit 1
         }
     }
 } catch {
-    Write-Error "âœ— Python not found or not in PATH"
-    Write-Error ""
-    Write-Error "Please install Python first:"
-    Write-Error "1. Go to https://www.python.org/downloads/"
-    Write-Error "2. Scroll down past the big yellow button"
-    Write-Error "3. Download 'Windows installer (64-bit)' from Files section"
-    Write-Error "4. During install, CHECK 'Add Python to PATH'"
-    Write-Error ""
+    Write-Error "Python not found or not in PATH"
+    Write-Error "Please install Python first and make sure to check 'Add Python to PATH'"
     pause
     exit 1
 }
@@ -62,7 +46,6 @@ Write-Host ""
 # Step 2: Email Configuration
 Write-Info "Step 2: Email Configuration"
 Write-Info "----------------------------"
-Write-Host ""
 Write-Warning "IMPORTANT: We need a Gmail APP PASSWORD, NOT your regular Gmail password!"
 Write-Host ""
 Write-Host "A Gmail App Password is a special 16-character password just for apps."
@@ -80,7 +63,7 @@ Write-Host ""
 
 $email = Read-Host "Enter your Gmail address"
 while ($email -notmatch "^[^@]+@gmail\.com$") {
-    Write-Warning "Please enter a valid Gmail address (must end with @gmail.com)"
+    Write-Warning "Please enter a valid Gmail address"
     $email = Read-Host "Enter your Gmail address"
 }
 
@@ -101,24 +84,21 @@ if ($emailPasswordPlain.Length -ne 16) {
     }
 }
 
-Write-Success "âœ" Email configured: $email"
+Write-Success "Email configured: $email"
 Write-Host ""
 
 # Step 3: Job Search Keywords
 Write-Info "Step 3: Job Search Settings"
 Write-Info "----------------------------"
-Write-Host "Enter keywords to search for (comma-separated)"
-Write-Host "Example: Epic Analyst, Clinical Informatics, EHR Analyst"
+Write-Host "Enter keywords (comma-separated)"
+Write-Host "Example: Epic Analyst, Clinical Informatics"
 Write-Host ""
 
 $keywordsInput = Read-Host "Job search keywords"
 $keywords = $keywordsInput -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }
 
 Write-Host ""
-Write-Host "Enter negative keywords to EXCLUDE (comma-separated, or press Enter to skip)"
-Write-Host "Example: nurse, physician, medical assistant"
-Write-Host ""
-
+Write-Host "Enter negative keywords to EXCLUDE (or press Enter to skip)"
 $negativeInput = Read-Host "Negative keywords (optional)"
 if ($negativeInput) {
     $negativeKeywords = $negativeInput -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }
@@ -126,18 +106,13 @@ if ($negativeInput) {
     $negativeKeywords = @()
 }
 
-Write-Success "âœ" Keywords configured"
+Write-Success "Keywords configured"
 Write-Host ""
 
 # Step 4: Career Sites
 Write-Info "Step 4: Career Sites to Monitor"
 Write-Info "--------------------------------"
-Write-Host "Enter career site URLs to monitor (one per line)"
-Write-Host "Press Enter on blank line when done"
-Write-Host ""
-Write-Host "Example URLs:"
-Write-Host "  https://careers.ohsu.edu/jobs"
-Write-Host "  https://providence.jobs/locations/oregon/jobs/"
+Write-Host "Enter career site URLs (one per line, blank to finish)"
 Write-Host ""
 
 $careerSites = @()
@@ -149,7 +124,7 @@ while ($true) {
     
     $siteUrl = Read-Host "Site #$siteCount URL"
     if ([string]::IsNullOrWhiteSpace($siteUrl)) {
-        Write-Warning "URL cannot be empty. Try again."
+        Write-Warning "URL cannot be empty"
         continue
     }
     
@@ -168,45 +143,37 @@ if ($careerSites.Count -eq 0) {
     exit 1
 }
 
-Write-Success "âœ" $($careerSites.Count) career sites added"
+Write-Success "$($careerSites.Count) career sites added"
 Write-Host ""
 
 # Step 5: Installation Paths
 Write-Info "Step 5: Installation Location"
 Write-Info "------------------------------"
 
-$defaultInstallPath = "C:\JobSearchMonitor"
-Write-Host "Where should we install the job monitor?"
-$installPath = Read-Host "Installation path [default: $defaultInstallPath]"
+$defaultInstallPath = "C:\OpportunityAlert"
+Write-Host "Installation path [default: $defaultInstallPath]:"
+$installPath = Read-Host
 if ([string]::IsNullOrWhiteSpace($installPath)) {
     $installPath = $defaultInstallPath
 }
 
-$resultsPath = Join-Path $installPath "Results"
+$scriptsPath = Join-Path $installPath "Scripts"
+$batchPath = Join-Path $installPath "Batch"
+$resultsPath = Join-Path $installPath "Scanned_Results"
 
-Write-Success "âœ" Installation path: $installPath"
-Write-Success "âœ" Results path: $resultsPath"
+Write-Success "Installation path: $installPath"
 Write-Host ""
 
 # Step 6: Schedule Configuration
 Write-Info "Step 6: Daily Schedule"
 Write-Info "----------------------"
-Write-Host "What time should the job monitor run each day?"
-Write-Host "Use 24-hour format (e.g., 08:00 for 8 AM, 17:00 for 5 PM)"
-Write-Host ""
-
-$scheduleTime = Read-Host "Daily run time [default: 08:00]"
+Write-Host "Daily scan time (24-hour format) [default: 08:00]:"
+$scheduleTime = Read-Host
 if ([string]::IsNullOrWhiteSpace($scheduleTime)) {
     $scheduleTime = "08:00"
 }
 
-# Validate time format
-while ($scheduleTime -notmatch "^\d{2}:\d{2}$") {
-    Write-Warning "Please use format HH:MM (e.g., 08:00)"
-    $scheduleTime = Read-Host "Daily run time"
-}
-
-Write-Success "âœ" Scheduled for daily run at $scheduleTime"
+Write-Success "Scheduled for daily scan at $scheduleTime"
 Write-Host ""
 
 # Step 7: Installation
@@ -217,16 +184,18 @@ try {
     # Create directories
     Write-Host "Creating directories..."
     New-Item -ItemType Directory -Force -Path $installPath | Out-Null
+    New-Item -ItemType Directory -Force -Path $scriptsPath | Out-Null
+    New-Item -ItemType Directory -Force -Path $batchPath | Out-Null
     New-Item -ItemType Directory -Force -Path $resultsPath | Out-Null
-    Write-Success "âœ" Directories created"
+    Write-Success "Directories created"
     
-    # Install Python packages
+    # Install packages
     Write-Host "Installing Python packages..."
-    $pipOutput = python -m pip install --quiet --upgrade pip requests 2>&1
-    Write-Success "âœ" Python packages installed"
+    python -m pip install --quiet --upgrade pip requests 2>&1 | Out-Null
+    Write-Success "Python packages installed"
     
-    # Create config.json
-    Write-Host "Creating configuration file..."
+    # Create config
+    Write-Host "Creating configuration..."
     $config = @{
         email = $email
         email_password = $emailPasswordPlain
@@ -235,176 +204,178 @@ try {
         career_sites = $careerSites
         schedule_time = $scheduleTime
         install_path = $installPath
+        scripts_path = $scriptsPath
+        batch_path = $batchPath
         results_path = $resultsPath
     }
     
     $configPath = Join-Path $installPath "config.json"
     $config | ConvertTo-Json -Depth 10 | Set-Content $configPath
-    Write-Success "âœ" Configuration saved"
+    Write-Success "Configuration saved"
     
-    # Copy template files and generate scripts
-    Write-Host "Generating monitoring scripts..."
-    
-    # Get script directory
+    # Copy templates to Scripts folder
+    Write-Host "Copying scripts..."
     $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
     $templatesDir = Join-Path $scriptDir "templates"
     
-    # Copy template files
-    if (Test-Path (Join-Path $templatesDir "job_monitor_template.py")) {
-        Copy-Item (Join-Path $templatesDir "job_monitor_template.py") (Join-Path $installPath "job_monitor.py")
-        Copy-Item (Join-Path $templatesDir "job_test_template.py") (Join-Path $installPath "job_test.py")
-        Write-Success "âœ" Python scripts created"
-    } else {
-        Write-Error "Template files not found! Make sure templates folder exists."
-        throw
-    }
+    Copy-Item (Join-Path $templatesDir "opportunity_alert_template.py") (Join-Path $scriptsPath "opportunity_alert.py")
+    Copy-Item (Join-Path $templatesDir "health_check_template.py") (Join-Path $scriptsPath "health_check.py")
+    Copy-Item (Join-Path $templatesDir "update_settings_template.py") (Join-Path $scriptsPath "update_settings.py")
     
-    # Create batch files
+    Write-Success "Scripts created"
+    
+    # Create batch files in Batch folder
     Write-Host "Creating batch files..."
     
-    # monitor.bat
-    @"
+    # scan_jobs.bat
+    $scanJobsBat = @"
 @echo off
-cd "$installPath"
-python job_monitor.py
+REM OpportunityAlert - Manual Job Scan
+cd "$scriptsPath"
+python opportunity_alert.py
 pause
-"@ | Set-Content (Join-Path $installPath "monitor.bat")
+"@
+    Set-Content (Join-Path $batchPath "scan_jobs.bat") $scanJobsBat
     
-    # monitor_all.bat
-    @"
+    # scan_all.bat
+    $scanAllBat = @"
 @echo off
-cd "$installPath"
-python job_monitor.py --all
+REM OpportunityAlert - Show All Jobs
+cd "$scriptsPath"
+python opportunity_alert.py --all
 pause
-"@ | Set-Content (Join-Path $installPath "monitor_all.bat")
+"@
+    Set-Content (Join-Path $batchPath "scan_all.bat") $scanAllBat
     
-    # monitor_reset.bat
-    @"
+    # scan_reset.bat
+    $scanResetBat = @"
 @echo off
-cd "$installPath"
-python job_monitor.py --reset
+REM OpportunityAlert - Reset History
+cd "$scriptsPath"
+python opportunity_alert.py --reset
 pause
-"@ | Set-Content (Join-Path $installPath "monitor_reset.bat")
+"@
+    Set-Content (Join-Path $batchPath "scan_reset.bat") $scanResetBat
     
-    # monitor_test.bat
-    @"
+    # health_check.bat
+    $healthCheckBat = @"
 @echo off
-cd "$installPath"
-python job_test.py
+REM OpportunityAlert - Site Health Check
+cd "$scriptsPath"
+python health_check.py
 pause
-"@ | Set-Content (Join-Path $installPath "monitor_test.bat")
+"@
+    Set-Content (Join-Path $batchPath "health_check.bat") $healthCheckBat
     
-    # run_job_monitor.bat (for Task Scheduler - no pause)
-    @"
+    # run_scheduled.bat (for Task Scheduler - no pause)
+    $runScheduledBat = @"
 @echo off
-cd "$installPath"
-python job_monitor.py
-"@ | Set-Content (Join-Path $installPath "run_job_monitor.bat")
+REM OpportunityAlert - Scheduled Task Runner
+cd "$scriptsPath"
+python opportunity_alert.py
+"@
+    Set-Content (Join-Path $batchPath "run_scheduled.bat") $runScheduledBat
     
-    # open_failed_sites.bat (will be updated by scripts)
-    @"
+    # update_settings.bat
+    $updateSettingsBat = @"
 @echo off
-echo No failed sites from last run.
+REM OpportunityAlert - Settings Manager
+cd "$scriptsPath"
+python update_settings.py
 pause
-"@ | Set-Content (Join-Path $installPath "open_failed_sites.bat")
+"@
+    Set-Content (Join-Path $batchPath "update_settings.bat") $updateSettingsBat
     
-    Write-Success "âœ" Batch files created"
-    
-    # Create update_settings.bat (launches PowerShell script)
-    @"
+    # open_failed_sites.bat
+    $openFailedBat = @"
 @echo off
-REM Settings Update Launcher for Job Search Monitor
-
-echo Starting settings manager...
-PowerShell.exe -ExecutionPolicy Bypass -File "%~dp0UPDATE_SETTINGS.ps1"
-"@ | Set-Content (Join-Path $installPath "update_settings.bat")
+echo No failed sites from last scan.
+pause
+"@
+    Set-Content (Join-Path $batchPath "open_failed_sites.bat") $openFailedBat
     
-    # Copy UPDATE_SETTINGS.ps1
-    if (Test-Path (Join-Path $templatesDir "UPDATE_SETTINGS.ps1")) {
-        Copy-Item (Join-Path $templatesDir "UPDATE_SETTINGS.ps1") (Join-Path $installPath "UPDATE_SETTINGS.ps1")
-    } else {
-        # Embedded version if template doesn't exist
-        $updateSettingsScript | Set-Content (Join-Path $installPath "UPDATE_SETTINGS.ps1")
+    Write-Success "Batch files created"
+    
+    # Task Scheduler
+    Write-Host "Setting up Task Scheduler..."
+    
+    $taskName = "OpportunityAlert"
+    $taskPath = Join-Path $batchPath "run_scheduled.bat"
+    
+    try {
+        schtasks /Delete /TN "$taskName" /F 2>&1 | Out-Null
+    } catch {}
+    
+    $taskXml = @"
+<?xml version="1.0" encoding="UTF-16"?>
+<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <Triggers>
+    <CalendarTrigger>
+      <StartBoundary>2026-01-01T$scheduleTime:00</StartBoundary>
+      <ScheduleByDay><DaysInterval>1</DaysInterval></ScheduleByDay>
+    </CalendarTrigger>
+  </Triggers>
+  <Settings>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <StartWhenAvailable>true</StartWhenAvailable>
+    <Enabled>true</Enabled>
+  </Settings>
+  <Actions Context="Author">
+    <Exec>
+      <Command>$taskPath</Command>
+      <WorkingDirectory>$scriptsPath</WorkingDirectory>
+    </Exec>
+  </Actions>
+</Task>
+"@
+    
+    $tempXml = Join-Path $env:TEMP "task_temp.xml"
+    $taskXml | Set-Content -Path $tempXml -Encoding Unicode
+    
+    $output = schtasks /Create /TN "$taskName" /XML "$tempXml" /F 2>&1
+    
+    if (Test-Path $tempXml) {
+        Remove-Item $tempXml -Force -ErrorAction SilentlyContinue
     }
     
-    # Copy UNINSTALL.ps1
-    if (Test-Path (Join-Path $templatesDir "UNINSTALL.ps1")) {
-        Copy-Item (Join-Path $templatesDir "UNINSTALL.ps1") (Join-Path $installPath "UNINSTALL.ps1")
-    }
-    
-    # Create uninstall.bat launcher
-    @"
-@echo off
-echo.
-echo WARNING: This will completely remove Job Search Monitor!
-echo.
-pause
-PowerShell.exe -ExecutionPolicy Bypass -File "%~dp0UNINSTALL.ps1"
-"@ | Set-Content (Join-Path $installPath "uninstall.bat")
-    
-    Write-Success "✓ Uninstaller created"
-    
-    # Create Task Scheduler task
-    Write-Host "Setting up Windows Task Scheduler..."
-    
-    $timeParts = $scheduleTime -split ":"
-    $hour = $timeParts[0]
-    $minute = $timeParts[1]
-    
-    $taskName = "Automated Job Monitor"
-    $taskPath = Join-Path $installPath "run_job_monitor.bat"
-    
-    # Remove existing task if it exists
-    schtasks /Query /TN $taskName 2>$null | Out-Null
     if ($LASTEXITCODE -eq 0) {
-        schtasks /Delete /TN $taskName /F | Out-Null
+        Write-Success "Task Scheduler configured"
+    } else {
+        Write-Warning "Could not create Task Scheduler task"
+        Write-Host "You can create it manually later"
     }
     
-    # Create new task
-    $action = New-ScheduledTaskAction -Execute $taskPath
-    $trigger = New-ScheduledTaskTrigger -Daily -At $scheduleTime
-    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
-    
-    Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Description "Automated job search monitoring" | Out-Null
-    
-    Write-Success "âœ" Task Scheduler configured"
-    
-    # Run initial test
+    # Run test
     Write-Host ""
     Write-Info "Running initial test..."
-    Set-Location $installPath
-    $testOutput = python job_monitor.py --reset 2>&1
-    
-    Write-Success "âœ" Test completed"
+    Set-Location $scriptsPath
+    python opportunity_alert.py --reset 2>&1 | Out-Null
+    Write-Success "Test completed"
     
 } catch {
-    Write-Error ""
     Write-Error "Installation failed: $_"
-    Write-Error ""
     pause
     exit 1
 }
 
-# Installation Complete
+# Done
 Write-Host ""
 Write-Success "=============================================="
 Write-Success "   INSTALLATION COMPLETE!"
 Write-Success "=============================================="
 Write-Host ""
-Write-Host "Your job monitor is now running automatically!"
+Write-Host "OpportunityAlert is now running automatically!"
 Write-Host ""
 Write-Host "Installation folder: $installPath"
-Write-Host "Next scheduled run: Tomorrow at $scheduleTime"
+Write-Host "Next scheduled scan: Tomorrow at $scheduleTime"
 Write-Host ""
-Write-Host "Test email sent - check your inbox!"
-Write-Host ""
-Write-Host "Available commands:"
-Write-Host "  monitor.bat         - Manual run (shows new jobs)"
-Write-Host "  monitor_all.bat     - Show all matching jobs"
-Write-Host "  monitor_reset.bat   - Clear history, start fresh"
-Write-Host "  monitor_test.bat    - Test site health"
+Write-Host "Available commands (in Batch folder):"
+Write-Host "  scan_jobs.bat       - Manual scan"
+Write-Host "  scan_all.bat        - Show all jobs"
+Write-Host "  scan_reset.bat      - Clear history"
+Write-Host "  health_check.bat    - Test sites"
 Write-Host "  update_settings.bat - Change settings"
 Write-Host ""
-Write-Host "Press any key to open installation folder..."
 pause
 Invoke-Item $installPath

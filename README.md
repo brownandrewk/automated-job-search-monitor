@@ -1,6 +1,6 @@
-# Automated Job Search Monitor
+# OpportunityAlert
 
-An automated system that monitors career websites daily and emails you when new jobs matching your criteria are found.
+An automated job search tool that monitors career websites daily and emails you when new opportunities matching your criteria are found.
 
 ## Features
 
@@ -10,6 +10,7 @@ An automated system that monitors career websites daily and emails you when new 
 - 🛠️ Easy setup with interactive installer
 - 📊 Health check script to verify sites are working
 - ⚙️ Simple settings management (no code editing required)
+- 📁 Clean, organized folder structure
 
 ---
 
@@ -42,17 +43,17 @@ That downloads the Microsoft Store launcher, which won't work correctly.
 3. Should show something like `Python 3.12.1`
 4. If you get an error, Python isn't installed correctly - try again
 
-### Step 2: Download This Repository
+### Step 2: Download OpportunityAlert
 
 **Option A: Download ZIP**
 1. Click the green "Code" button above
 2. Click "Download ZIP"
-3. Extract the ZIP to any folder (e.g., `C:\Downloads\job-monitor`)
+3. Extract the ZIP to any folder (e.g., `C:\Downloads\OpportunityAlert`)
 
 **Option B: Clone with Git** (if you have Git installed)
 ```bash
-git clone https://github.com/yourusername/job-search-monitor.git
-cd job-search-monitor
+git clone https://github.com/yourusername/OpportunityAlert.git
+cd OpportunityAlert
 ```
 
 ### Step 3: Run the Installer
@@ -63,24 +64,20 @@ cd job-search-monitor
 3. If you see a security warning, click "More info" → "Run anyway"
 4. Follow the prompts
 
-**ALTERNATIVE METHOD (If SETUP.bat doesn't work):**
-1. Right-click `INSTALL.ps1` → Properties
-2. Check "Unblock" at the bottom → Click OK
-3. Right-click `INSTALL.ps1` → "Run with PowerShell"
-
-**If you see errors about execution policy:**
+**If SETUP.bat doesn't work:**
 1. Open PowerShell as Administrator (Win + X → "Windows PowerShell (Admin)")
-2. Run: `Set-ExecutionPolicy RemoteSigned`
-3. Type `Y` and press Enter
-4. Run `SETUP.bat` again
+2. Navigate to the folder: `cd "C:\path\to\OpportunityAlert"`
+3. Run: `Set-ExecutionPolicy RemoteSigned`
+4. Type `Y` and press Enter
+5. Run `SETUP.bat` again
 
-**Follow the prompts:**
+**Follow the installer prompts:**
 - Enter your Gmail address
 - Enter your Gmail App Password (see below)
 - Enter job search keywords
 - Enter career site URLs
-- Choose installation location
-- Choose daily run time
+- Choose installation location (default: C:\OpportunityAlert)
+- Choose daily scan time
 
 The installer will:
 - ✅ Install required Python packages
@@ -106,28 +103,56 @@ The installer will:
 
 ---
 
+## Installed Folder Structure
+
+After installation, you'll have:
+
+```
+C:\OpportunityAlert\
+├── config.json              # Your settings
+├── Scripts\
+│   ├── opportunity_alert.py # Main scanner
+│   ├── health_check.py      # Site testing
+│   └── update_settings.py   # Settings manager
+├── Batch\
+│   ├── scan_jobs.bat        # Manual scan
+│   ├── scan_all.bat         # Show all jobs
+│   ├── scan_reset.bat       # Clear history
+│   ├── health_check.bat     # Test sites
+│   ├── update_settings.bat  # Change settings
+│   └── open_failed_sites.bat # Open problem sites
+└── Scanned_Results\
+    ├── job_results.txt      # Latest results
+    └── .job_history.json    # Tracking file
+```
+
+---
+
 ## Usage
 
-### Automated Daily Runs
+### Automated Daily Scans
 
-After installation, the script runs automatically every day at your chosen time. No action needed!
+After installation, OpportunityAlert runs automatically every day at your chosen time. No action needed!
 
-### Manual Runs
+### Manual Scans
 
-Use these batch files (found in your installation folder):
+Navigate to `C:\OpportunityAlert\Batch\` and use these:
 
-- **`monitor.bat`** - Standard run (check for new jobs, send email if found)
-- **`monitor_all.bat`** - Show ALL matching jobs (not just new ones)
-- **`monitor_reset.bat`** - Clear history and treat all jobs as new
-- **`monitor_test.bat`** - Run health check on all sites
+- **`scan_jobs.bat`** - Standard scan (shows new jobs, sends email if found)
+- **`scan_all.bat`** - Show ALL matching jobs (not just new ones)
+- **`scan_reset.bat`** - Clear history and treat all jobs as new
+- **`health_check.bat`** - Test all sites to verify they're working
 
 ### Update Your Settings
 
 Double-click **`update_settings.bat`** to:
+- Add/remove job search keywords
+- Add/remove negative keywords (jobs to exclude)
 - Add/remove career sites
-- Change keywords
-- Update email settings
-- Modify schedule time
+- View full configuration
+- Create backup of settings
+
+No code editing needed - everything is menu-driven!
 
 ---
 
@@ -150,6 +175,7 @@ Some sites may fail due to:
 - Bot protection (403 errors)
 - Site maintenance
 - Changed URLs
+- JavaScript-heavy sites (can't be scraped easily)
 
 **What to do:**
 - Click the provided links to check manually
@@ -159,6 +185,7 @@ Some sites may fail due to:
 ### Opening Failed Sites Quickly
 
 **From your computer:**
+- Navigate to `C:\OpportunityAlert\Batch\`
 - Double-click `open_failed_sites.bat`
 - All failed sites open in browser tabs at once
 
@@ -171,8 +198,8 @@ Some sites may fail due to:
 
 ### Adding New Career Sites
 
-1. Run `update_settings.bat`
-2. Choose option 2 (Career sites)
+1. Run `update_settings.bat` (in Batch folder)
+2. Choose option 3 (Career sites)
 3. Choose "Add new site"
 4. Enter organization name and URL
 
@@ -184,7 +211,7 @@ Some sites may fail due to:
 
 ### Advanced: Edit Config Directly
 
-Open `config.json` in any text editor:
+If comfortable with JSON, open `config.json` in any text editor:
 
 ```json
 {
@@ -197,7 +224,7 @@ Open `config.json` in any text editor:
 }
 ```
 
-Save and close - changes take effect on next run.
+Save and close - changes take effect on next scan.
 
 ---
 
@@ -205,7 +232,7 @@ Save and close - changes take effect on next run.
 
 ### Run the Health Check
 
-Double-click `monitor_test.bat` to verify:
+Double-click `health_check.bat` (in Batch folder) to verify:
 - Which sites are working
 - How many jobs each site has
 - Which jobs match your keywords
@@ -213,11 +240,15 @@ Double-click `monitor_test.bat` to verify:
 
 **Example output:**
 ```
-OHSU: 47 total jobs | 3 match your keywords
+OHSU
+----
+✓ 47 total jobs found | 3 match your keywords
   Example: "Epic Ambulatory Analyst"
   
-PeaceHealth: 0 jobs found ⚠️
-  Manual check: https://careers.peacehealth.org
+PeaceHealth
+-----------
+⚠️  0 jobs found (site may have changed or uses JavaScript)
+   Manual check: https://careers.peacehealth.org
 ```
 
 ### Common Issues
@@ -227,90 +258,120 @@ PeaceHealth: 0 jobs found ⚠️
 - Reinstall Python and CHECK "Add Python to PATH"
 
 **No emails received:**
-- Verify Gmail App Password is correct
+- Verify Gmail App Password is correct (16 characters)
 - Check spam folder
-- Run `monitor_reset.bat` to force an email test
+- Run `scan_reset.bat` to force an email test
 
 **Task not running automatically:**
-- Open Task Scheduler
-- Find "Automated Job Monitor" task
-- Right-click → Run to test
-- Check History tab for errors
+- The installer may not be able to create the Task Scheduler task on some systems
+- You can set it up manually in 5 minutes (see Manual Task Scheduler Setup below)
+
+**Manual Task Scheduler Setup:**
+
+If the installer couldn't create the scheduled task automatically, follow these steps:
+
+1. Press `Win + R`, type `taskschd.msc`, press Enter
+2. Click "Create Basic Task" in the right panel
+3. **Name:** OpportunityAlert
+4. **Description:** Daily automated job scanning
+5. Click Next
+
+6. **Trigger:** Select "Daily", click Next
+7. **Start date:** Today
+8. **Time:** Choose your preferred scan time (e.g., 8:00 AM)
+9. **Recur every:** 1 day
+10. Click Next
+
+11. **Action:** Select "Start a program", click Next
+12. **Program/script:** Click Browse and navigate to:
+    - `C:\OpportunityAlert\Batch\run_scheduled.bat`
+13. **Start in:** Leave blank
+14. Click Next, then Finish
+
+15. **Final step - Important settings:**
+    - Right-click the "OpportunityAlert" task you just created
+    - Click "Properties"
+    - Go to "Conditions" tab
+    - **UNCHECK** "Start the task only if the computer is on AC power"
+    - Click OK
+
+Done! The task will now run daily at your chosen time.
 
 **Sites showing 0 results:**
 - Some sites block automated scraping
 - Check manually using the provided link
-- Consider running health check weekly
+- Run health check weekly to track which sites work
+
+**Batch files not working:**
+- Make sure you're running them from the Batch folder
+- Right-click → "Run as administrator" if needed
 
 ---
 
-## Files & Folders
+## Uninstallation
 
-After installation:
+**Manual Method:**
 
-```
-C:\JobSearchMonitor\
-├── job_monitor.py          # Main monitoring script
-├── job_test.py            # Health check script
-├── config.json            # Your settings
-├── monitor.bat            # Standard run
-├── monitor_all.bat        # Show all jobs
-├── monitor_reset.bat      # Clear history
-├── monitor_test.bat       # Health check
-├── update_settings.bat    # Settings menu
-├── open_failed_sites.bat  # Open failed sites
-├── Results\
-│   ├── job_results.txt    # Latest search results
-│   └── .job_history.json  # Tracking file (don't delete)
-```
+1. Open Task Scheduler (Win + R, type `taskschd.msc`)
+2. Find "OpportunityAlert" task
+3. Right-click → Delete
+4. Delete the installation folder (`C:\OpportunityAlert\`)
+5. Uninstall Python (if not using for other purposes)
 
 ---
 
 ## Tips for Best Results
 
-- ✅ Run `monitor_test.bat` weekly to verify sites are working
+- ✅ Run `health_check.bat` weekly to verify sites are working
 - ✅ Check failed sites manually - they often have great opportunities
-- ✅ Run `monitor_reset.bat` monthly to see all current openings
+- ✅ Run `scan_reset.bat` monthly to see all current openings again
 - ✅ Adjust keywords if getting too many/too few results
 - ✅ Keep your keywords specific to your field
+- ✅ Use negative keywords to filter out irrelevant jobs
 
 ---
 
 ## Privacy & Security
 
 - ✅ All data stays on your computer
-- ✅ No data sent anywhere except job site requests
-- ✅ Gmail password stored locally in plain text config file
+- ✅ No data sent anywhere except job site requests and email notifications
+- ✅ Gmail password stored locally in config.json
 - ✅ No tracking, no analytics, no cloud services
 - ⚠️ Keep your `config.json` secure (contains email password)
 
 ---
 
-## Uninstallation
+## Examples
 
-**Easy Method (Recommended):**
+### Example Keywords (Healthcare IT):
+```
+Epic Analyst, Clinical Informatics, EHR Analyst, Ambulatory, 
+Compass Rose, Cogito, Principal Trainer
+```
 
-1. Go to your installation folder (default: `C:\JobSearchMonitor\`)
-2. Double-click `uninstall.bat`
-3. Confirm you want to uninstall
-4. Optionally backup your configuration to Desktop
-5. Confirm final deletion
+### Example Negative Keywords:
+```
+nurse, physician, medical assistant, pharmacist
+```
 
-The uninstaller will:
-- ✅ Remove the Task Scheduler task
-- ✅ Offer to backup your settings
-- ✅ Delete all files and folders
-- ✅ Clean up completely
+### Example Career Sites:
+- OHSU: https://careersat-ohsu.icims.com/jobs/intro
+- Providence: https://providence.jobs/locations/oregon/jobs/
+- Kaiser Permanente: https://www.kaiserpermanentejobs.org/location/oregon-jobs/641/6252001-5744337/3
 
-**Manual Method:**
+---
 
-If you need to uninstall manually:
+## Command-Line Options
 
-1. Open Task Scheduler (Win + R, type `taskschd.msc`)
-2. Find "Automated Job Monitor" task
-3. Right-click → Delete
-4. Delete the installation folder (`C:\JobSearchMonitor\`)
-5. Uninstall Python (if not using for other purposes)
+For advanced users, you can run the scanner directly:
+
+```bash
+cd "C:\OpportunityAlert\Scripts"
+python opportunity_alert.py           # Normal scan
+python opportunity_alert.py --all     # Show all jobs
+python opportunity_alert.py --reset   # Clear history
+python opportunity_alert.py --no-email # Skip email
+```
 
 ---
 
@@ -318,11 +379,32 @@ If you need to uninstall manually:
 
 If something isn't working:
 
-1. Run `monitor_test.bat` to diagnose
+1. Run `health_check.bat` to diagnose site issues
 2. Check Task Scheduler history for errors
 3. Verify Python and packages are installed
 4. Check `config.json` for typos
 5. Review email spam folder
+6. Open an issue on GitHub with details
+
+---
+
+## Roadmap
+
+See [ROADMAP.md](ROADMAP.md) for planned features including:
+- Web-based dashboard interface
+- Job application tracking
+- Analytics and trends
+- Cloud hosting option
+- Mobile app
+
+---
+
+## Contributing
+
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Submit a pull request
 
 ---
 
@@ -338,3 +420,32 @@ Created to help job seekers automate the tedious parts of job searching and focu
 
 **Version:** 1.0  
 **Last Updated:** January 2026
+
+---
+
+## Frequently Asked Questions
+
+**Q: Will this work on Mac or Linux?**  
+A: Currently Windows only. Mac/Linux support is planned for a future release.
+
+**Q: Can I monitor sites that aren't listed in the examples?**  
+A: Yes! You can add any career website. Just add the name and URL using `update_settings.bat`.
+
+**Q: How many sites can I monitor?**  
+A: No hard limit, but we recommend 10-30 for best performance and to avoid overwhelming yourself with results.
+
+**Q: Will this apply to jobs for me?**  
+A: No, this tool only finds and alerts you to new opportunities. You still need to apply manually.
+
+**Q: Is my data private?**  
+A: Yes! Everything runs locally on your computer. No data is sent to any servers except the job sites you're monitoring and Gmail for email notifications.
+
+**Q: Can I use a different email provider?**  
+A: Currently only Gmail is supported. Other providers may be added in future releases.
+
+**Q: Why do some sites always fail?**  
+A: Some career sites use aggressive bot protection or require JavaScript to load job listings. These sites need to be checked manually.
+
+---
+
+*Happy job hunting! 🎯*
